@@ -60,6 +60,10 @@ class Subscriber {
         const command = new CommandBuilder(payload)
           .injectInstance(this.instance, { notChangeFrom: true })
 
+        if (command.from?.manager && command.from.manager === this.instance.options.manager) {
+          return;
+        }
+
         this.subscriptions.forEach((subscription) => {
           subscription(command);
         });
