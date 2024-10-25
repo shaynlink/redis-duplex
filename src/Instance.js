@@ -70,6 +70,14 @@ class Instance extends EventEmitter {
     });
   }
 
+  close() {
+    try {
+      this.redis.disconnect();
+      this.subscriber.subRedis.disconnect();
+      this.publisher.subRedis.disconnect();
+    } catch {}
+  }
+
   /**
    * Check compatibility with remote redis duplex
    * @returns {void}
