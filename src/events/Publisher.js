@@ -30,7 +30,7 @@ class Publisher {
   publish(command) {
     command.injectInstance(this.instance);
     this.instance.emit('publish', command);
-    return this.subRedis.publish(this.instance.pool, JSON.stringify(command));
+    return this.subRedis.publish(this.instance.pool, command.toString());
   }
 }
 

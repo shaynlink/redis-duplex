@@ -156,7 +156,7 @@ class CommandBuilder {
   }
 
   toString() {
-    return JSON.parse(this.toJSON());
+    return JSON.stringify(this.toJSON());
   }
 
   [Symbol.toPrimitive](hint) {

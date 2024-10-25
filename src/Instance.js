@@ -49,6 +49,27 @@ class Instance extends EventEmitter {
     this.publisher = new Publisher(this);
   }
 
+  waitToReady() {
+    return new Promise((resolve) => {
+      let readys = 0;
+      const setReady = () => {
+        readys++;
+        if (readys == 3) {
+          resolve();
+        }
+      }
+      this.redis.once('ready', () => {
+        setReady();
+      });
+      this.subscriber.subRedis.once('ready', () => {
+        setReady();
+      });
+      this.publisher.subRedis.once('ready', () => {
+        setReady();
+      });
+    });
+  }
+
   /**
    * Check compatibility with remote redis duplex
    * @returns {void}
@@ -103,7 +124,9 @@ class Instance extends EventEmitter {
    */
   async request(command) {
     if (!(command instanceof CommandBuilder)) {
-      throw new TypeError('command must be an instance of CommandBuilder');
+      const err = new Error('command must be an instance of CommandBuilder');
+      console.error(err);
+      throw err;
     }
 
     command.generateKey();
@@ -111,7 +134,6 @@ class Instance extends EventEmitter {
     return new Promise((resolve, reject) => {
       let timeout;
       const unsubscribe = this.subscribe((incomingCommand) => {
-        console.log('REQUEST', incomingCommand);
         if (command.commandId == incomingCommand.commandId) {
           return;
         }
