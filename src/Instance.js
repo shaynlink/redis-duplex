@@ -131,7 +131,7 @@ class Instance extends EventEmitter {
    * @returns {import('./events/Subscriber')['middleware']}
    */
   get middleware() {
-    return this.subscriber.middlware.bind(this.subscriber);
+    return this.subscriber.middleware.bind(this.subscriber);
   }
 
   /**
