@@ -20,6 +20,11 @@ class Subscriber {
      * @type {Set<CommandBuilder>}
      */
     this.commands = new Set();
+
+    /**
+     * @type {Set<import('../type').MiddlewareCallback>}
+     */
+    this.middlewares = new Set();
     /**
      * @type {Set<import('../type').SubscriptionCallback>}
      */
@@ -38,15 +43,13 @@ class Subscriber {
       pub.publish(respCommand);
     });
 
-    this.subRedis.subscribe(this.instance.pool, (err, count) => {
+    this.subRedis.subscribe(this.instance.pool, (err) => {
       if (err) {
         console.error('Failed to subscribe:', err)
-      } else {
-        console.log('Subscribed successfully! This client is currently subscribed to %s channels.', count)
       }
     })
 
-    this.subRedis.on('message', (channel, message) => {
+    this.subRedis.on('message', async (channel, message) => {
       if (channel === this.instance.pool) {
         this.instance.emit('message', message)
         let payload;
@@ -60,13 +63,19 @@ class Subscriber {
         const command = new CommandBuilder(payload)
           .injectInstance(this.instance, { notChangeFrom: true })
 
-        if (command.from?.manager && command.from.manager === this.instance.options.manager) {
-          return;
-        }
-
         this.subscriptions.forEach((subscription) => {
           subscription(command);
         });
+
+        for (const middleware of this.middlewares) {
+          let valid = false;
+          await middleware(command, this.instance.publisher, (result) => {
+            valid = result;
+          });
+          if (!valid) {
+            return;
+          }
+        }
 
         let valid = false;
         this.commands.forEach(({ filter, callback }) => {
@@ -81,7 +90,6 @@ class Subscriber {
     });
 
     this.subRedis.on('ready', () => {
-      console.log('Redis subscriber ready');
       this.instance.checkCompatibility();
     });
   }
@@ -99,6 +107,17 @@ class Subscriber {
 
     return () => {
       this.commands.delete(command);
+    }
+  }
+
+  /**
+   * @param {import('../type').MiddlewareCallback} callback
+   */
+  middlware(callback) {
+    this.middlewares.add(callback);
+
+    return () => {
+      this.middlewares.delete(callback);
     }
   }
 
@@ -132,11 +151,26 @@ class Subscriber {
       return false;
     }
   
-    if (!filter.broadcast && filter.user && filter.user !== '*' && filter.user !== command.user && this.instance.options.user !== command.user) {
+    if (
+        !filter.broadcast &&
+        filter.user &&
+        filter.user !== true &&
+        filter.user !== '*' &&
+        filter.user !== command.user &&
+        this.instance.options.user !== command.user &&
+        command.user !== '*'
+      ) {
       return false;
     }
 
-    if (!filter.broadcast && filter.manager && filter.manager !== '*' && filter.manager !== command.manager && this.instance.options.manager !== command.manager) {
+    if (
+        !filter.broadcast &&
+        filter.manager &&
+        filter.manager !== '*' &&
+        filter.manager !== command.manager &&
+        this.instance.options.manager !== command.manager &&
+        command.manager !== '*'
+      ) {
       return false;
     }
 

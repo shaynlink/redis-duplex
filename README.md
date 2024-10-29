@@ -86,6 +86,12 @@ const unsubscribeCommand = instance.command({ manager: 'proxy-manager', user: tr
   pub.publish(responseCommand);
 }) // Or instance.subscriber.command
 
+instance.createSession('name', (manager) => {
+  console.log('Session created', manager.id);
+
+  manager.command({ manager: 'proxy-manager', user: true, service: 'authorize' });
+});
+
 setTimeout(() => {
   // You can remove listener easily
   unsubscribeListener();

@@ -5,6 +5,7 @@ const debug = require('debug')('redis-duplex:instance');
 const Subscriber = require('./events/Subscriber');
 const Publisher = require('./events/Publisher');
 const CommandBuilder = require('./builders/CommandBuilder');
+const Session = require('./Session');
 const { version } = require('../package.json');
 
 const COMPATIBILITY_HISTORY = {
@@ -47,6 +48,8 @@ class Instance extends EventEmitter {
      * @type {Publisher}
      */
     this.publisher = new Publisher(this);
+
+    this.sessions = new Map();
   }
 
   waitToReady() {
@@ -69,13 +72,25 @@ class Instance extends EventEmitter {
       });
     });
   }
-
+ 
+  /**
+   * @returns {Promise<[undefined, undefined, undefined]>}
+   */
   close() {
-    try {
-      this.redis.disconnect();
-      this.subscriber.subRedis.disconnect();
-      this.publisher.subRedis.disconnect();
-    } catch {}
+    return Promise.all([
+      new Promise((resolve) => {
+        this.redis.removeAllListeners();
+        this.redis.quit().then(resolve);
+      }),
+       new Promise((resolve) => {
+         this.subscriber.subRedis.removeAllListeners();
+         this.subscriber.subRedis.quit().then(resolve);
+      }),
+      new Promise((resolve) => {
+        this.publisher.subRedis.removeAllListeners();
+        this.publisher.subRedis.quit().then(resolve);
+      })
+    ])
   }
 
   /**
@@ -163,6 +178,20 @@ class Instance extends EventEmitter {
 
       this.publish(command);
     });
+  }
+
+  createSession(name) {
+    const session = new Session(this, name, true);
+    this.sessions.set(name, session);
+
+    return session;
+  }
+
+  async joinSession(name) {
+    const session = new Session(this, name, false);
+    this.sessions.set(name, session);
+
+    return session;
   }
 }
 

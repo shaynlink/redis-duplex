@@ -13,10 +13,6 @@ class Publisher {
      */
     this.subRedis = this.instance.redis.duplicate();
 
-    this.subRedis.on('ready', () => {
-      console.log('Redis publisher ready');
-    })
-
     this.subRedis.on('error', (error) => {
       console.error('Redis publisher error', error);
     });

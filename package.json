@@ -1,13 +1,13 @@
 {
   "name": "redis-duplex",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "src/index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +17,9 @@
     "debug": "^4.3.7",
     "ioredis": "^5.4.1",
     "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "ioredis-mock": "^8.9.0",
+    "jest": "^29.7.0"
   }
 }

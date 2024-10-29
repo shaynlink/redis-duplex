@@ -115,7 +115,7 @@ class CommandBuilder {
     return this;
   }
 
-  setBroadcast() {
+    setBroadcast() {
     this.user = '*';
     this.manager = '*';
     return this;
