@@ -98,7 +98,7 @@ class Subscriber {
    * Register command & callback
    * @param {import('../type').CommandFilter} filter
    * @param {(import('../type').SubscriptionCallback} callback 
-   * @returns {{ filter: import('../type').CommandFilter, callback: import('../type').SubscriptionCallback }} the command
+   * @returns {() => boolean} the command
    */
   command(filter, callback) {
     const command = { filter, callback };
@@ -112,12 +112,13 @@ class Subscriber {
 
   /**
    * @param {import('../type').MiddlewareCallback} callback
+   * @returns {(import('../type').MiddlewareCallback} unsubscribe function
    */
-  middlware(callback) {
+  middleware(callback) {
     this.middlewares.add(callback);
 
     return () => {
-      this.middlewares.delete(callback);
+      return this.middlewares.delete(callback);
     }
   }
 
