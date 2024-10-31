@@ -71,8 +71,8 @@ describe('🗝️ Filtering command', () => {
     expect(instance.subscriber.suitable({ user: 'foo' }, goodBroadcastUser)).toBeTruthy();
     expect(instance.subscriber.suitable({ user: true }, goodManualUser)).toBeTruthy();
     expect(instance.subscriber.suitable({ user: true }, goodEveryUser)).toBeTruthy();
+    expect(instance.subscriber.suitable({ user: true }, badManualUser)).toBeFalsy();
     expect(instance.subscriber.suitable({ user: 'foo' }, goodEveryUser)).toBeTruthy();
-
 
     instance.options.user = 'bar';
 
@@ -96,6 +96,8 @@ describe('🗝️ Filtering command', () => {
     expect(instance.subscriber.suitable({ manager: 'foo' }, goodInjectedManager)).toBeTruthy();
     expect(instance.subscriber.suitable({ manager: 'foo' }, goodBroadcastManager)).toBeTruthy();
     expect(instance.subscriber.suitable({ manager: true }, goodManualManager)).toBeTruthy();
+    expect(instance.subscriber.suitable({ manager: true }, goodBroadcastManager)).toBeTruthy();
+    expect(instance.subscriber.suitable({ manager: true }, badManualManager)).toBeFalsy();
 
 
     instance.options.manager = 'bar';

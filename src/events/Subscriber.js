@@ -148,7 +148,11 @@ class Subscriber {
     if (filter.command && filter.command !== command.command) {
       return false;
     }
-  
+
+    if (filter.user === true) {
+      filter.user = this.instance.options.user;
+    }
+
     if (
         !filter.broadcast &&
         filter.user &&
@@ -159,6 +163,10 @@ class Subscriber {
         command.user !== '*'
       ) {
       return false;
+    }
+
+    if (filter.manager === true) {
+      filter.manager = this.instance.options.manager;
     }
 
     if (
