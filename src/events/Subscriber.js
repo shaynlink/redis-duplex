@@ -68,11 +68,8 @@ class Subscriber {
         });
 
         for (const middleware of this.middlewares) {
-          let valid = false;
-          await middleware(command, this.instance.publisher, (result) => {
-            valid = result;
-          });
-          if (!valid) {
+          const result = await middleware(command, this.instance.publisher);
+          if (!result) {
             return;
           }
         }

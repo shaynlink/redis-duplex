@@ -63,12 +63,15 @@ describe('🗝️ Filtering command', () => {
     const badManualUser = new CommandBuilder().setUser('bar');
     const goodInjectedUser = new CommandBuilder().injectInstance(instance).useSelfUser();
     const goodBroadcastUser = new CommandBuilder().setBroadcast();
+    const goodEveryUser = new CommandBuilder().setUser('*');
 
     expect(instance.subscriber.suitable({ user: 'foo' }, goodManualUser)).toBeTruthy();
     expect(instance.subscriber.suitable({ user: 'foo' }, badManualUser)).toBeFalsy(); 
     expect(instance.subscriber.suitable({ user: 'foo' }, goodInjectedUser)).toBeTruthy();
     expect(instance.subscriber.suitable({ user: 'foo' }, goodBroadcastUser)).toBeTruthy();
     expect(instance.subscriber.suitable({ user: true }, goodManualUser)).toBeTruthy();
+    expect(instance.subscriber.suitable({ user: true }, goodEveryUser)).toBeTruthy();
+    expect(instance.subscriber.suitable({ user: 'foo' }, goodEveryUser)).toBeTruthy();
 
 
     instance.options.user = 'bar';

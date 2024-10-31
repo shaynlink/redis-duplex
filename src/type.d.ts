@@ -18,4 +18,4 @@ export interface CommandFilter {
 }
 
 export type SubscriptionCallback = (command: CommandBuilder, pub: Publisher) => void;
-export type MiddlewareCallback = (command: CommandBuilder, pub: Publisher, next: () => void) => void;
+export type MiddlewareCallback = (command: CommandBuilder, pub: Publisher) => boolean;
